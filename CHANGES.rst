@@ -1,3 +1,5 @@
+.. _ferm__ref_changelog:
+
 Changelog
 =========
 
@@ -6,20 +8,94 @@ Changelog
 **debops.ferm**
 
 This project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`__
-and `human-readable changelog <http://keepachangelog.com/en/0.3.0/>`__.
+and `human-readable changelog <http://keepachangelog.com/en/1.0.0/>`__.
 
-The current role maintainer_ is drybjed_
+The current role maintainer_ is drybjed_.
 
 
-v0.2.2
-------
+`debops.ferm master`_ - unreleased
+----------------------------------
 
-*Unreleased*
+.. _debops.ferm master: https://github.com/debops/ansible-ferm/compare/v0.3.0...master
+
+
+`debops.ferm v0.3.0`_ - 2017-07-12
+----------------------------------
+
+.. _debops.ferm v0.3.0: https://github.com/debops/ansible-ferm/compare/v0.2.2...v0.3.0
 
 Added
 ~~~~~
 
-- Allow to disable :envvar:`ferm__rules_forward` using
+- Add a variable which can be used to restrict what network interfaces can be
+  used for connections from Ansible Controller. [gaudenz]
+
+- Update the Ansible facts automatically if they have been changed. [drybjed_]
+
+Changed
+~~~~~~~
+
+- Reject other protocols besides TCP and UDP on IPv6 networks at the end of the
+  chain. [gaudenz]
+
+- Packets blocked due to rate limits will be now dropped instead of being
+  rejected by default. [gaudenz]
+
+- The data format of the firewall rules has been redesigned. Rules can now be
+  defined as nested YAML lists, existing default or dependent rules can
+  be easily modified through the Ansible inventory, multiple firewall rules can
+  be included in one configuration file. [drybjed_]
+
+- The firewall rules are now read from the :file:`/etc/ferm/rules.d/` directory
+  to help with transition to the new data format and avoid tab-completion
+  collision with the :file:`/etc/ferm/ferm.conf` file. [drybjed_]
+
+- Use of multiple rule parameters that define the final filename of the
+  configuration files has been dropped, now only the ``item.name`` parameter is
+  used to define the filename. [drybjed_]
+
+- The role automatically removes duplicate configuration files (based on the
+  ``name`` parameter) when the weight of a given rule is changed to make
+  modifications easier. [drybjed_]
+
+- The scale of the "weight" used to sort the rules in the directory has been
+  changed from 00-99 to 000-999. [drybjed_]
+
+- The ``item.weight`` parameter is now relative to the "weight class" or rule
+  type defined for a given firewall rule. You can use negative weight values
+  for better control over rule order. [drybjed_]
+
+- Run the ``debconf`` task only when APT is the package manager. This should
+  allow the role to be used on OSes other than Debian/Ubuntu. [drybjed_]
+
+- The :file:`/etc/ferm/ferm.conf` configuration file will be now properly
+  diverted to preserve the original. [drybjed_]
+
+Removed
+~~~~~~~
+
+- The ``ferm__default_weight`` variable has been removed. The default rule
+  weight is defined in the weight map directly. [drybjed_]
+
+- The role will no longer create the :file:`/etc/ferm/ferm.d/` directory by
+  default. Existing directories are not removed. [drybjed_]
+
+- The ``item.when`` and ``item.delete`` parameters are no longer supported. You
+  can control rule presence conditionally using ``item.rule_state`` or
+  ``item.state`` parameters. [drybjed_]
+
+
+`debops.ferm v0.2.2`_ - 2016-12-01
+----------------------------------
+
+.. _debops.ferm v0.2.2: https://github.com/debops/ansible-ferm/compare/v0.2.1...v0.2.2
+
+Added
+~~~~~
+
+- Write missing role documentation. [ganto_, ypid_, drybjed_]
+
+- Allow to disable ``ferm__rules_forward`` using
   :envvar:`ferm__forward_accept`. [ypid_]
 
 Changed
@@ -28,11 +104,10 @@ Changed
 - Use the `Ansible package module`_ which requires Ansible v2.0. [ypid_]
 
 - Be more precise about the expected format of ``item.by_role`` in
-  :ref:`default_rules`. [ypid_]
+  :ref:`ferm__ref_default_rules`. [ypid_]
 
 - Move kernel parameters to enable reverse path filtering to the
-  ``debops.sysctl`` role. [ypid_]
-
+  debops.sysctl_ role. [ypid_]
 
 Fixed
 ~~~~~
@@ -52,36 +127,50 @@ Deprecated
   compatibility. [ypid_]
 
 - Deprecated ``item.role``, use ``item.by_role`` instead. Applies for:
-  :ref:`default_rules`. [ypid_]
+  :ref:`ferm__ref_default_rules`. [ypid_]
 
-v0.2.1
-------
 
-*Released: 2016-04-21*
+`debops.ferm v0.2.1`_ - 2016-04-21
+----------------------------------
+
+.. _debops.ferm v0.2.1: https://github.com/debops/ansible-ferm/compare/v0.2.0...v0.2.1
+
+Changed
+~~~~~~~
 
 - Rename ``item.state`` parameter to ``item.rule_state`` to avoid collision
   with ``iptables state`` module support. [drybjed_]
 
-v0.2.0
-------
 
-*Released: 2016-04-20*
+`debops.ferm v0.2.0`_ - 2016-04-20
+----------------------------------
+
+.. _debops.ferm v0.2.0: https://github.com/debops/ansible-ferm/compare/v0.1.6...v0.2.0
+
+Added
+~~~~~
 
 - Support ``item.state`` key in ``ferm_*_rules`` variables to add or remove
   firewall rules. [drybjed_]
 
+Changed
+~~~~~~~
+
 - Rename all role variables to put them in their own namespace. [drybjed_]
 
-v0.1.6
-------
 
-*Released: 2016-04-20*
+`debops.ferm v0.1.6`_ - 2016-04-20
+----------------------------------
 
-- Remove ``ferm_local_tags`` variable and its use in ``ferm_enabled``. This
-  solution was needed when the POSIX capability detection was located in the
-  tasks. Because now the templating is done in default variables which can be
-  easily overridden by Ansible inventory, having a separate way of affecting
-  POSIX capability detection is unnecessary.
+.. _debops.ferm v0.1.6: https://github.com/debops/ansible-ferm/compare/v0.1.5...v0.1.6
+
+Added
+~~~~~
+
+- Create base documentation files, clean up default variables. [ganto_, drybjed_]
+
+Changed
+~~~~~~~
 
 - Enable the firewall if ``ansible_local`` and local Ansible facts are
   undefined. This will ensure that the role works on hosts which don't have it
@@ -91,12 +180,23 @@ v0.1.6
   Old names are currently still supported to not break stuff while updating the
   code which depends on the old names. [ypid_]
 
-- Create base documentation files, clean up default variables. [ganto_, drybjed_]
+Removed
+~~~~~~~
 
-v0.1.5
-------
+- Remove ``ferm_local_tags`` variable and its use in ``ferm_enabled``. This
+  solution was needed when the POSIX capability detection was located in the
+  tasks. Because now the templating is done in default variables which can be
+  easily overridden by Ansible inventory, having a separate way of affecting
+  POSIX capability detection is unnecessary.
 
-*Released: 2016-02-20*
+
+`debops.ferm v0.1.5`_ - 2016-02-20
+----------------------------------
+
+.. _debops.ferm v0.1.5: https://github.com/debops/ansible-ferm/compare/v0.1.4...v0.1.5
+
+Changed
+~~~~~~~
 
 - Restart :program:`fail2ban` when firewall rules are flushed, in case it's set up on
   the host. [bleuchtang]
@@ -104,14 +204,21 @@ v0.1.5
 - Restart :program:`ferm` only when the firewall rules have been modified, to not rest
   the firewall counters on every Ansible run. [Logan2211, drybjed_]
 
-v0.1.4
-------
 
-*Released: 2016-02-07*
+`debops.ferm v0.1.4`_ - 2016-02-07
+----------------------------------
+
+.. _debops.ferm v0.1.4: https://github.com/debops/ansible-ferm/compare/v0.1.3...v0.1.4
+
+Added
+~~~~~
 
 - Add a way to copy custom files to remote hosts before starting the firewall.
   This allows users to add custom scripts that generate firewall rules in case
   of more esoteric environments. [drybjed_]
+
+Changed
+~~~~~~~
 
 - Change the sysctl configuration from a handler to a conditional task. This
   should make sure ``debops.ferm`` works on older operating systems. [drybjed_]
@@ -132,21 +239,32 @@ v0.1.4
 - Do not remove or generate firewall rules when :program:`ferm` is disabled to improve
   Ansible performance. [drybjed_]
 
-v0.1.3
-------
 
-*Released: 2015-11-13*
+`debops.ferm v0.1.3`_ - 2015-11-13
+----------------------------------
+
+.. _debops.ferm v0.1.3: https://github.com/debops/ansible-ferm/compare/v0.1.2...v0.1.3
+
+Added
+~~~~~
+
+- Add set of predefined :program:`ferm` variables used by other Ansible roles. [drybjed_]
+
+Changed
+~~~~~~~
 
 - Redesign hook support. Instead of patching the :program:`ferm` init script, use
   internal ``@hook`` commands to run scripts in specific directories using
   ``run-parts``. [drybjed_]
 
-- Add set of predefined :program:`ferm` variables used by other Ansible roles. [drybjed_]
 
-v0.1.2
-------
+`debops.ferm v0.1.2`_ - 2015-11-12
+----------------------------------
 
-*Released: 2015-11-12*
+.. _debops.ferm v0.1.2: https://github.com/debops/ansible-ferm/compare/v0.1.1...v0.1.2
+
+Added
+~~~~~
 
 - Add support for different "weight classes" of rules.
 
@@ -155,6 +273,29 @@ v0.1.2
   ``ferm_weight_map`` dictionary, if a corresponding entry is found, its weight
   will be used for that rule, if not, the weight specified in the rule will be
   used instead. [drybjed_]
+
+- Add ``hashlimit`` filter, move filtering rules.
+
+  New ``hashlimit`` filter allows configuration of firewall rules using
+  ``hashlimit`` module.
+
+  Existing firewall rules which filtered ICMP and TCP SYN packets, defined in
+  :file:`/etc/ferm/ferm.conf`, have been moved to their own configuration files in
+  :file:`/etc/ferm/rules/filter/input/` directory. [drybjed_]
+
+- Add ``accept`` filter template which can be used to create rules that match
+  interfaces, ports, remote IP addresses/subnets and can accept the packets,
+  reject, or redirect to a different chain. [drybjed_]
+
+- Add a separate ``&log()`` ferm function and use it for logging packets in
+  other :program:`ferm` rules. [drybjed_]
+
+- Add ``item.interface_present`` and ``item.outerface_present`` parameters to
+  ``active`` rule template. These parameters check if specified network
+  interfaces exist before adding the firewall rules. [drybjed_]
+
+Changed
+~~~~~~~
 
 - Move firewall rules into :file:`rules/` subdirectory.
 
@@ -171,15 +312,6 @@ v0.1.2
   create duplicate firewall rules, :program:`ferm` will only include rules from the
   new directories. [drybjed_]
 
-- Add ``hashlimit`` filter, move filtering rules.
-
-  New ``hashlimit`` filter allows configuration of firewall rules using
-  ``hashlimit`` module.
-
-  Existing firewall rules which filtered ICMP and TCP SYN packets, defined in
-  :file:`/etc/ferm/ferm.conf`, have been moved to their own configuration files in
-  :file:`/etc/ferm/rules/filter/input/` directory. [drybjed_]
-
 - Rename ``conntrack`` list, rebalance rule weight.
 
   This change will create new ``conntrack`` rules with different filenames due
@@ -194,10 +326,6 @@ v0.1.2
   If you have :program:`ferm` disabled anywhere (set to ``False``), you will need to
   change the name of the variable in inventory to the new one before running
   this role. Otherwise there should be no changes necessary. [drybjed_]
-
-- Add ``accept`` filter template which can be used to create rules that match
-  interfaces, ports, remote IP addresses/subnets and can accept the packets,
-  reject, or redirect to a different chain. [drybjed_]
 
 - Move the default loopback accept :command:`iptables` rule to the new directory-based
   setup. [drybjed_]
@@ -248,26 +376,23 @@ v0.1.2
   other target is specified, rule will still be added to the firewall.
   [drybjed_]
 
-- Add a separate ``&log()`` ferm function and use it for logging packets in
-  other :program:`ferm` rules. [drybjed_]
+- Convert forward firewall rules to the new :program:`ferm` configuration. [drybjed_]
+
+Removed
+~~~~~~~
 
 - Remove :program:`ferm.d/chain.conf.j2` Ansible template as well as other unused
   templates. Functionality of this template is replaced by
   :program:`ferm.d/accept.conf.j2` template. [drybjed_]
 
-- Add ``item.interface_present`` and ``item.outerface_present`` parameters to
-  ``active`` rule template. These parameters check if specified network
-  interfaces exist before adding the firewall rules. [drybjed_]
 
-- Convert forward firewall rules to the new :program:`ferm` configuration. [drybjed_]
+`debops.ferm v0.1.1`_ - 2015-10-08
+----------------------------------
 
-v0.1.1
-------
+.. _debops.ferm v0.1.1: https://github.com/debops/ansible-ferm/compare/v0.1.0...v0.1.1
 
-*Released: 2015-10-08*
-
-- Switch ``debops.ferm`` from using :program:`ferm` binary directly to restarting and
-  stopping :program:`ferm` system service. [drybjed_]
+Added
+~~~~~
 
 - Add support for ferm init script hooks.
 
@@ -294,6 +419,24 @@ v0.1.1
   outside of :program:`ferm` itself and allow to correctly preserve :command:`ip(6)tables`
   rules when :program:`ferm` is restarted or reloaded. [drybjed_]
 
+- Add a ``ferm_default_rules`` list variable with a set of default firewall
+  rules for all hosts.
+
+  Connection tracking rules from main :program:`ferm` configuration file are moved to
+  the new directory-based rule structure. They are defined in a separate list
+  variable included in ``ferm_default_rules``. [drybjed_]
+
+- Add support for specifying incoming and outgoing network interfaces in
+  :file:`filter/conntrack.conf.j2` template. [drybjed_]
+
+- Add "custom" rule template. [drybjed_]
+
+Changed
+~~~~~~~
+
+- Switch ``debops.ferm`` from using :program:`ferm` binary directly to restarting and
+  stopping :program:`ferm` system service. [drybjed_]
+
 - Due to the huge number of subdirectories in :file:`/etc/ferm/` that need to be
   created, their creation is moved to a separate shell script, which will be
   run once at the first install of the :program:`ferm` firewall.
@@ -308,17 +451,7 @@ v0.1.1
   Old rules are still supported to enable easy transition to the new system.
   [drybjed_]
 
-- Add a ``ferm_default_rules`` list variable with a set of default firewall
-  rules for all hosts.
-
-  Connection tracking rules from main :program:`ferm` configuration file are moved to
-  the new directory-based rule structure. They are defined in a separate list
-  variable included in ``ferm_default_rules``. [drybjed_]
-
 - Fix missing closing bracket. [drybjed_]
-
-- Add support for specifying incoming and outgoing network interfaces in
-  :file:`filter/conntrack.conf.j2` template. [drybjed_]
 
 - Copy ``init-hooks.patch`` file to remote host and patch it from there to fix
   issues with ``patch`` module on older versions of Ansible. [drybjed_]
@@ -326,12 +459,12 @@ v0.1.1
 - Move tasks that patch :program:`ferm` init script to separate task list and add
   a condition that only does the patching if :program:`ferm` is enabled. [drybjed_]
 
-- Add "custom" rule template. [drybjed_]
 
-v0.1.0
-------
+debops.ferm v0.1.0 - 2015-09-04
+-------------------------------
 
-*Released: 2015-09-04*
+Added
+~~~~~
 
 - Add Changelog [drybjed_]
 
@@ -340,10 +473,6 @@ v0.1.0
 
 - Add ``item.name`` rule option to specify custom names in rule filenames.
   [drybjed_]
-
-- Move the :program:`ferm` package into ``ferm_packages`` list and rewrite the task to
-  only use the list variable without Jinja templating. This fixes the "It is
-  unnecessary to use '{{' in loops" error. [drybjed_]
 
 - Add support for :program:`fail2ban`. If :program:`fail2ban-server` is installed and is
   currently active, :program:`ferm` will reload :program:`fail2ban` rules after firewall
@@ -354,3 +483,10 @@ v0.1.0
 
 - Add Ansible tags to tasks that manage the firewall rules to make reloading of
   them faster. [drybjed_]
+
+Changed
+~~~~~~~
+
+- Move the :program:`ferm` package into ``ferm_packages`` list and rewrite the task to
+  only use the list variable without Jinja templating. This fixes the "It is
+  unnecessary to use '{{' in loops" error. [drybjed_]
